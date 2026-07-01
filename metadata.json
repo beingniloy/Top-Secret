@@ -1,0 +1,6 @@
+{
+  "name": "Top Secret",
+  "description": "A privacy-first, fully offline personal security application.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

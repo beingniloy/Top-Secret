@@ -1,0 +1,17 @@
+build:
+  maxIssues: 0
+  excludeCorrectable: false
+  weights:
+    complexity: 2
+    formatting: 1
+    LongParameterList: 1
+    LongMethod: 1
+
+complexity:
+  active: true
+  LongParameterList:
+    active: true
+    threshold: 15
+  LongMethod:
+    active: true
+    threshold: 150

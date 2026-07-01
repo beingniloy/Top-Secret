@@ -1,0 +1,84 @@
+name: Automated Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Gradle Cache
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Create empty local.properties and .env
+        run: |
+          touch local.properties
+          echo "MASTER_KEY_HEX=0000000000000000000000000000000000000000000000000000000000000000" > .env
+          echo "FAKE_KEY_HEX=1111111111111111111111111111111111111111111111111111111111111111" >> .env
+
+      - name: Decode Signing Keystore
+        run: |
+          echo "${{ secrets.SIGNING_KEYSTORE_BASE64 }}" | base64 --decode > my-upload-key.jks
+
+      - name: Build and Sign Release APK & AAB
+        run: ./gradlew assembleRelease bundleRelease
+        env:
+          SIGNING_KEYSTORE_PATH: "my-upload-key.jks"
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+
+      - name: Prepare Release Assets
+        id: prep_assets
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          
+          # Copy and rename APK
+          cp app/build/outputs/apk/release/app-release.apk TopSecret-${TAG_NAME}.apk
+          
+          # Copy and rename AAB
+          cp app/build/outputs/bundle/release/app-release.aab TopSecret-${TAG_NAME}.aab
+          
+          # Generate SHA256 checksum file
+          sha256sum TopSecret-${TAG_NAME}.apk TopSecret-${TAG_NAME}.aab > SHA256SUMS.txt
+          
+          # Locate ProGuard mapping if it exists
+          if [ -f app/build/outputs/mapping/release/mapping.txt ]; then
+            cp app/build/outputs/mapping/release/mapping.txt mapping.txt
+          else
+            echo "No Proguard mapping file was generated (minifyEnabled is false)." > mapping.txt
+          fi
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            TopSecret-${{ github.ref_name }}.apk
+            TopSecret-${{ github.ref_name }}.aab
+            SHA256SUMS.txt
+            mapping.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
