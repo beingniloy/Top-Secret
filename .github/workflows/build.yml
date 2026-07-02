@@ -49,6 +49,10 @@ jobs:
           echo "MASTER_KEY_HEX=0000000000000000000000000000000000000000000000000000000000000000" > .env
           echo "FAKE_KEY_HEX=1111111111111111111111111111111111111111111111111111111111111111" >> .env
 
+      - name: Decode Debug Keystore
+        run: |
+          base64 --decode debug.keystore.base64 > debug.keystore
+
       - name: Run ktlint Check
         run: ./gradlew ktlintCheck
 
