@@ -1,3 +1,12 @@
+plugins {
+  alias(libs.plugins.android.application)
+  alias(libs.plugins.kotlin.compose)
+  alias(libs.plugins.google.devtools.ksp)
+  alias(libs.plugins.roborazzi)
+  alias(libs.plugins.secrets)
+  alias(libs.plugins.detekt)
+  alias(libs.plugins.ktlint)
+}
 
 fun getGitVersionName(): String {
   return try {
@@ -32,15 +41,6 @@ fun getGitVersionCode(): Int {
   }
 }
 
-plugins {
-  alias(libs.plugins.android.application)
-  alias(libs.plugins.kotlin.compose)
-  alias(libs.plugins.google.devtools.ksp)
-  alias(libs.plugins.roborazzi)
-  alias(libs.plugins.secrets)
-  alias(libs.plugins.detekt)
-  alias(libs.plugins.ktlint)
-}
 
 android {
   namespace = "com.example"
