@@ -32,6 +32,8 @@ jobs:
 
       - name: Setup Gradle Cache
         uses: gradle/actions/setup-gradle@v4
+        with:
+          validate-wrappers: false
 
       - name: Make Gradlew Executable
         run: chmod +x gradlew
