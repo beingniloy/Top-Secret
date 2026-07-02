@@ -1,12 +1,11 @@
 
-import java.io.ByteArrayOutputStream
-
 fun getGitVersionName(): String {
   return try {
-    val gitDescribe = providers.exec {
-      commandLine("git", "describe", "--tags", "--always", "--dirty")
-      isIgnoreExitValue = true
-    }.standardOutput.asText.getOrElse("1.0.0").trim()
+    val gitDescribe =
+      providers.exec {
+        commandLine("git", "describe", "--tags", "--always", "--dirty")
+        isIgnoreExitValue = true
+      }.standardOutput.asText.getOrElse("1.0.0").trim()
     if (gitDescribe.startsWith("v")) {
       gitDescribe.substring(1)
     } else if (gitDescribe.isEmpty() || gitDescribe == "1.0.0") {
@@ -21,10 +20,11 @@ fun getGitVersionName(): String {
 
 fun getGitVersionCode(): Int {
   return try {
-    val countText = providers.exec {
-      commandLine("git", "rev-list", "--count", "HEAD")
-      isIgnoreExitValue = true
-    }.standardOutput.asText.getOrElse("1").trim()
+    val countText =
+      providers.exec {
+        commandLine("git", "rev-list", "--count", "HEAD")
+        isIgnoreExitValue = true
+      }.standardOutput.asText.getOrElse("1").trim()
     val count = countText.toIntOrNull() ?: 1
     if (count <= 0) 1 else count
   } catch (e: Exception) {
@@ -58,14 +58,14 @@ android {
 
   signingConfigs {
     create("release") {
-      val keystorePath = System.getenv("KEYSTORE_PATH") ?: System.getenv("SIGNING_KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks"
+      val keystorePath = System.getenv("KEYSTORE_PATH") ?: System.getenv("SIGNING_KEYSTORE_PATH") ?: "$rootDir/my-upload-key.jks"
       storeFile = file(keystorePath)
       storePassword = System.getenv("SIGNING_STORE_PASSWORD") ?: System.getenv("STORE_PASSWORD")
       keyAlias = System.getenv("SIGNING_KEY_ALIAS") ?: "upload"
       keyPassword = System.getenv("SIGNING_KEY_PASSWORD") ?: System.getenv("KEY_PASSWORD")
     }
     create("debugConfig") {
-      storeFile = file("${rootDir}/debug.keystore")
+      storeFile = file("$rootDir/debug.keystore")
       storePassword = "android"
       keyAlias = "androiddebugkey"
       keyPassword = "android"
@@ -100,7 +100,6 @@ secrets {
   propertiesFileName = ".env"
   defaultPropertiesFileName = ".env.example"
 }
-
 
 // Some unused dependencies are commented out below instead of being removed.
 // This makes it easy to add them back in the future if needed.
@@ -162,4 +161,3 @@ ktlint {
   verbose.set(true)
   outputToConsole.set(true)
 }
-
