@@ -59,7 +59,7 @@ android {
     create("release") {
       val keystorePath = System.getenv("KEYSTORE_PATH") ?: System.getenv("SIGNING_KEYSTORE_PATH") ?: "$rootDir/my-upload-key.jks"
       val keystoreFile = file(keystorePath)
-      if (keystoreFile.exists()) {
+      if (keystoreFile.exists() && keystoreFile.length() > 0) {
         storeFile = keystoreFile
         storePassword = System.getenv("SIGNING_STORE_PASSWORD") ?: System.getenv("STORE_PASSWORD")
         keyAlias = System.getenv("SIGNING_KEY_ALIAS") ?: "upload"

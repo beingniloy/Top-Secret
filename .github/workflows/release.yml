@@ -44,9 +44,26 @@ jobs:
           echo "MASTER_KEY_HEX=0000000000000000000000000000000000000000000000000000000000000000" > .env
           echo "FAKE_KEY_HEX=1111111111111111111111111111111111111111111111111111111111111111" >> .env
 
+      - name: Setup Debug Keystore
+        run: |
+          if [ -f debug.keystore.base64 ]; then
+            echo "Decoding existing debug.keystore.base64"
+            base64 --decode debug.keystore.base64 > debug.keystore
+          elif [ -f debug.keystore ]; then
+            echo "Using existing debug.keystore"
+          else
+            echo "Generating new debug.keystore"
+            keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug, O=Android, C=US"
+          fi
+
       - name: Decode Signing Keystore
         run: |
-          echo "${{ secrets.SIGNING_KEYSTORE_BASE64 }}" | base64 --decode > my-upload-key.jks
+          if [ -n "${{ secrets.SIGNING_KEYSTORE_BASE64 }}" ]; then
+            echo "Decoding signing keystore"
+            echo "${{ secrets.SIGNING_KEYSTORE_BASE64 }}" | base64 --decode > my-upload-key.jks
+          else
+            echo "No SIGNING_KEYSTORE_BASE64 secret provided. Falling back to debug keystore."
+          fi
 
       - name: Build and Sign Release APK & AAB
         run: ./gradlew assembleRelease bundleRelease
